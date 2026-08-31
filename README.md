@@ -15,6 +15,8 @@ Wathiqa is a mobile-first digital document wallet prototype inspired by the simp
 - No government database integrations.
 - Demo QR verification is clearly labeled as non-official.
 - The prototype does not claim documents are officially verified.
+- Locally added demo documents and mock settings persist only for the current browser session.
+- No authentication, backend, or sensitive-document storage is included.
 
 ## Project structure
 
@@ -77,4 +79,5 @@ Common options:
    - Run `npm run build`.
    - Upload or publish the contents of `dist/`.
 
+No environment variables or backend services are required for this prototype. GitHub Pages deployment is configured in `.github/workflows/pages.yml`; enable **Settings → Pages → Build and deployment → Source: GitHub Actions** after pushing to `main`.
 No environment variables or backend services are required for this prototype.

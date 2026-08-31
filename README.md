@@ -80,3 +80,4 @@ Common options:
    - Upload or publish the contents of `dist/`.
 
 No environment variables or backend services are required for this prototype. GitHub Pages deployment is configured in `.github/workflows/pages.yml`; enable **Settings → Pages → Build and deployment → Source: GitHub Actions** after pushing to `main`.
+No environment variables or backend services are required for this prototype.

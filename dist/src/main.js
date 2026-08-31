@@ -10,11 +10,14 @@ const screens = ['welcome', 'wallet', 'add', 'details', 'qr', 'profile'];
 const storageKey = 'wathiqa-demo-documents-v02';
 const settingsStorageKey = 'wathiqa-demo-settings-v02';
 const defaultDocuments = Object.values(templates).map((document, index) => ({ ...document, id: `demo-${index}` }));
+let screen = 'welcome';
+let documents = Object.values(templates).map((document, index) => ({ ...document, id: `demo-${index}` }));
+let selectedId = documents[0].id;
 const root = document.querySelector('#root');
 const maskNumber = (value) => `•••• •••• ${value.slice(-4)}`;
 const icon = (name) => `<span class="icon" aria-hidden="true">${name}</span>`;
 
-function restoreDocuments() {
+lfunction restoreDocuments() {
   const savedDocuments = sessionStorage.getItem(storageKey);
   if (!savedDocuments) return defaultDocuments;
 
@@ -123,6 +126,13 @@ window.addEventListener('popstate', (event) => {
 
 function shell(content) {
   const header = screen === 'welcome' ? '' : `<header class="top-bar"><button class="icon-button" data-back aria-label="Go back">‹</button><span class="brand-mark">وثيقة</span><button class="icon-button" data-nav="profile" aria-label="Open profile">◉</button></header>`;
+function navigate(next) { screen = next; render(); }
+function openDocument(id) { selectedId = id; navigate('details'); }
+function addDocument(type) { const newDocument = { ...templates[type], id: `${type}-${Date.now()}` }; documents = [newDocument, ...documents]; selectedId = newDocument.id; navigate('details'); }
+function selectedDocument() { return documents.find((document) => document.id === selectedId) ?? documents[0]; }
+
+function shell(content) {
+  const header = screen === 'welcome' ? '' : `<header class="top-bar"><button class="icon-button" data-nav="wallet" aria-label="Back to wallet">‹</button><span class="brand-mark">وثيقة</span><button class="icon-button" data-nav="profile" aria-label="Open profile">◉</button></header>`;
   return `<main class="app-shell"><div class="phone-frame">${header}${content}</div></main>`;
 }
 
@@ -145,4 +155,17 @@ function profile() {
 }
 
 window.history.replaceState(currentState(), '', window.location.href);
+function add() { return `<section class="content screen-enter"><p class="eyebrow">Add Document</p><h2>Choose a demo document</h2><p class="muted">This prototype creates fake wallet cards for interaction testing.</p>${(Object.keys(templates)).map((type) => `<button class="choice" data-add="${type}">${icon('✦')}${type}<span>Demo</span></button>`).join('')}</section>`; }
+function details() { const document = selectedDocument(); return `<section class="content screen-enter"><div class="large-card" style="background:${document.gradient}"><p>${document.type}</p><h2>${document.name}</h2><span>${maskNumber(document.number)}</span><b class="badge">✓</b></div><dl class="details-grid">${[['Name', document.name], ['Document type', document.type], ['Masked number', maskNumber(document.number)], ['Date of birth', document.dob], ['Issue date', document.issue], ['Expiration date', document.expiration], ['Status', 'Valid']].map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl><div class="button-row"><button class="primary-button" data-nav="qr">▦ Show QR</button><button class="secondary-button">ⓘ Details</button></div></section>`; }
+function qr() { const document = selectedDocument(); return `<section class="content center screen-enter"><p class="eyebrow">QR Verification</p><div class="qr-box" aria-label="Demo QR code"><div class="qr-grid">${Array.from({ length: 81 }).map((_, i) => `<span class="${(i * 7 + 3) % 5 === 0 || i % 10 === 0 ? 'dark' : ''}"></span>`).join('')}</div></div><h2>Document verified</h2><p class="muted">${document.type} for ${document.name} passed this prototype/demo verification flow.</p><div class="verified-pill">✓ Demo verification system — not official verification.</div></section>`; }
+function profile() { return `<section class="content screen-enter"><p class="eyebrow">Profile / Settings</p><h2>Amal Hassan</h2><div class="settings-card">${icon('◉')}<div><strong>Demo user profile</strong><p>Personal prototype account with local demo documents.</p></div></div><div class="settings-card">${icon('◇')}<div><strong>Security settings</strong><p>Face unlock mock, passcode mock, encrypted wallet concept.</p></div></div><div class="settings-card">${icon('ⓘ')}<div><strong>App information</strong><p>Wathiqa v0.1 prototype. Fake data only; no official verification.</p></div></div></section>`; }
+
+function render() {
+  const screens = { welcome, wallet, add, details, qr, profile };
+  root.innerHTML = shell(screens[screen]());
+  root.querySelectorAll('[data-nav]').forEach((element) => element.addEventListener('click', () => navigate(element.dataset.nav)));
+  root.querySelectorAll('[data-open]').forEach((element) => element.addEventListener('click', () => openDocument(element.dataset.open)));
+  root.querySelectorAll('[data-add]').forEach((element) => element.addEventListener('click', () => addDocument(element.dataset.add)));
+}
+
 render();
